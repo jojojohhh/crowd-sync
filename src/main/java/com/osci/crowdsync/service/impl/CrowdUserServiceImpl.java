@@ -22,7 +22,7 @@ public class CrowdUserServiceImpl implements CrowdUserService {
 
     private final RestTemplate restTemplate;
     private final AtlassianProperties atlassianProperties;
-    private final String CROWD_USER_CREST_URL = "/rest/usermanagement/1/user";
+    private final String CROWD_USER_REST_API_URL = "/rest/usermanagement/1/user";
 
     @Override
     public void updateUser() {
@@ -35,7 +35,7 @@ public class CrowdUserServiceImpl implements CrowdUserService {
                 .emailAddress("sjjo@osci.kr")
                 .build();
         HttpEntity<?> httpEntity = new HttpEntity<>(userDto, httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(atlassianProperties.getCrowd().getUrl() + CROWD_USER_CREST_URL, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(atlassianProperties.getCrowd().getUrl() + CROWD_USER_REST_API_URL, httpEntity, String.class);
         log.info("status code : " + responseEntity.getStatusCodeValue());
     }
 
@@ -50,7 +50,7 @@ public class CrowdUserServiceImpl implements CrowdUserService {
                 .emailAddress("sjjo@osci.kr")
                 .build();
         HttpEntity<?> httpEntity = new HttpEntity<>(userDto, httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(atlassianProperties.getCrowd().getUrl() + CROWD_USER_CREST_URL, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(atlassianProperties.getCrowd().getUrl() + CROWD_USER_REST_API_URL, httpEntity, String.class);
         log.info("status code : " + responseEntity.getStatusCodeValue());
     }
 
