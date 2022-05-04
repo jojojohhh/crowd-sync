@@ -1,7 +1,11 @@
 package com.osci.crowdsync.controller;
 
+import com.osci.crowdsync.dto.CrowdUserDto;
+import com.osci.crowdsync.dto.SysUserIdDto;
 import com.osci.crowdsync.service.impl.CrowdUserServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,13 +17,39 @@ public class IndexController {
 
     @RequestMapping("/update")
     public String update() {
-        crowdUserService.updateUser();
+        CrowdUserDto userDto = CrowdUserDto.builder()
+                .name("test1234")
+                .password(new CrowdUserDto.Password())
+                .firstName("sangje")
+                .lastName("jo")
+                .displayName("test1234")
+                .email("sjjo@osci.kr")
+                .build();
+        crowdUserService.updateUser(userDto);
         return "index";
     }
 
     @RequestMapping("/create")
     public String create() {
-        crowdUserService.createUser();
+        CrowdUserDto userDto = CrowdUserDto.builder()
+                .name("test1234")
+                .password(new CrowdUserDto.Password())
+                .firstName("sangje")
+                .lastName("jo")
+                .displayName("test-sangjejo")
+                .email("sjjo@osci.kr")
+                .build();
+        crowdUserService.createUser(userDto);
         return "index";
+    }
+
+    @GetMapping("/{corpCode}/{userId}")
+    public String get(@PathVariable String corpCode, @PathVariable String userId) {
+        return crowdUserService.findUserById(
+                SysUserIdDto.builder()
+                        .corpCode(corpCode)
+                        .userId(userId)
+                        .build()
+        ).toString();
     }
 }
