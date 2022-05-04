@@ -11,6 +11,8 @@ public class CrowdUserDto {
 
     private String name;
 
+    private Password password;
+
     @JsonProperty("first-name")
     private String firstName;
 
@@ -19,5 +21,15 @@ public class CrowdUserDto {
 
     @JsonProperty("display-name")
     private String displayName;
+
     private String email;
+
+    @Getter
+    public static class Password {
+        private String value;
+
+        public Password() {
+            this.value = "secret";
+        }
+    }
 }
