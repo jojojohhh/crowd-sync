@@ -42,7 +42,7 @@ public class CrowdUserServiceImpl implements CrowdUserService {
     public void updateUser(CrowdUserDto userDto) {
         HttpHeaders httpHeaders = getDefaultHeaders();
         HttpEntity<?> httpEntity = new HttpEntity<>(userDto, httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(atlassianProperties.getCrowd().getUrl() + CROWD_USER_REST_API_URL + "/username?test1234", HttpMethod.PUT, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(atlassianProperties.getCrowd().getUrl() + CROWD_USER_REST_API_URL + "?username=" + userDto.getName(), HttpMethod.PUT, httpEntity, String.class);
         log.info("status code : " + responseEntity.getStatusCodeValue());
     }
 
