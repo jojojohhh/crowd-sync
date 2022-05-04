@@ -13,8 +13,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Log4j2
 @Service
@@ -34,12 +33,17 @@ public class CrowdUserServiceImpl implements CrowdUserService {
     }
 
     @Override
-    public List<SysUserDto> findAllUsers(){
-        return sysUserRepository.streamAll().map(SysUserDto::new).collect(Collectors.toList());
+    public Stream<SysUserDto> findAllUsers(){
+        return sysUserRepository.streamAll().map(SysUserDto::new);
     }
 
     @Override
-    public void updateUser(CrowdUserDto userDto) {
+    public void getCrowdUser() {
+
+    }
+
+    @Override
+    public void updateCrowdUser(CrowdUserDto userDto) {
         HttpHeaders httpHeaders = getDefaultHeaders();
         HttpEntity<?> httpEntity = new HttpEntity<>(userDto, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(atlassianProperties.getCrowd().getUrl() + CROWD_USER_REST_API_URL + "?username=" + userDto.getName(), HttpMethod.PUT, httpEntity, String.class);
@@ -47,7 +51,7 @@ public class CrowdUserServiceImpl implements CrowdUserService {
     }
 
     @Override
-    public void createUser(CrowdUserDto userDto) {
+    public void createCrowdUser(CrowdUserDto userDto) {
         HttpHeaders httpHeaders = getDefaultHeaders();
         HttpEntity<?> httpEntity = new HttpEntity<>(userDto, httpHeaders);
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(atlassianProperties.getCrowd().getUrl() + CROWD_USER_REST_API_URL, httpEntity, String.class);

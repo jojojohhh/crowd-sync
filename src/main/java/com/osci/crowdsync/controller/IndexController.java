@@ -25,7 +25,7 @@ public class IndexController {
                 .displayName("test1234")
                 .email("sjjo@osci.kr")
                 .build();
-        crowdUserService.updateUser(userDto);
+        crowdUserService.updateCrowdUser(userDto);
         return "index";
     }
 
@@ -39,7 +39,7 @@ public class IndexController {
                 .displayName("test-sangjejo")
                 .email("sjjo@osci.kr")
                 .build();
-        crowdUserService.createUser(userDto);
+        crowdUserService.createCrowdUser(userDto);
         return "index";
     }
 
