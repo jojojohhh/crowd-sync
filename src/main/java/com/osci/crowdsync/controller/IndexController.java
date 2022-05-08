@@ -4,6 +4,8 @@ import com.osci.crowdsync.dto.CrowdUserDto;
 import com.osci.crowdsync.dto.SysUserIdDto;
 import com.osci.crowdsync.service.impl.CrowdUserServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Log4j2
 public class IndexController {
 
     private final CrowdUserServiceImpl crowdUserService;
@@ -52,4 +55,14 @@ public class IndexController {
                         .build()
         ).toString();
     }
+
+    /*
+    @GetMapping("/all")
+    public String getNotUpdatedAllUsers() {
+        crowdUserService.findAllNotUpdated().forEach( sysUserDto ->
+                log.info(sysUserDto.toString())
+        );
+        return "true";
+    }
+     */
 }

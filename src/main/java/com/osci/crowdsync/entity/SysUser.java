@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@IdClass(SysUserId.class)
+@IdClass(UserId.class)
 @Table(name = "SYS_USER")
 public class SysUser {
 
