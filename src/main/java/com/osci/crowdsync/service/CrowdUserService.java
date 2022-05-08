@@ -3,8 +3,9 @@ package com.osci.crowdsync.service;
 import com.osci.crowdsync.dto.CrowdUserDto;
 import com.osci.crowdsync.dto.SysUserDto;
 import com.osci.crowdsync.dto.SysUserIdDto;
-import com.osci.crowdsync.entity.UpdatedUser;
+import com.osci.crowdsync.entity.SysUser;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public interface CrowdUserService {
@@ -13,7 +14,7 @@ public interface CrowdUserService {
 
     Stream<SysUserDto> findAllUsers();
 
-    Stream<UpdatedUser> findAllNotUpdated();
+    List<SysUser> findAllNotUpdated();
 
     void getCrowdUser();
 

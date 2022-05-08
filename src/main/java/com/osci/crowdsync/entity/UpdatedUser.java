@@ -21,7 +21,7 @@ public class UpdatedUser {
     @Column(name = "USER_ID")
     private String userId;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumns({
             @JoinColumn(name = "CORP_CODE"),
             @JoinColumn(name = "USER_ID")

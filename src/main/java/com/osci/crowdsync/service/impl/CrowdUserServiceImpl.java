@@ -4,7 +4,7 @@ import com.osci.crowdsync.config.properties.AtlassianProperties;
 import com.osci.crowdsync.dto.CrowdUserDto;
 import com.osci.crowdsync.dto.SysUserDto;
 import com.osci.crowdsync.dto.SysUserIdDto;
-import com.osci.crowdsync.entity.UpdatedUser;
+import com.osci.crowdsync.entity.SysUser;
 import com.osci.crowdsync.repository.SysUserRepository;
 import com.osci.crowdsync.repository.UpdatedUserRepository;
 import com.osci.crowdsync.service.CrowdUserService;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 @Log4j2
@@ -43,8 +44,8 @@ public class CrowdUserServiceImpl implements CrowdUserService {
 
     @Override
     @Transactional
-    public Stream<UpdatedUser> findAllNotUpdated() {
-        return null;
+    public List<SysUser> findAllNotUpdated() {
+        return sysUserRepository.streamAllNotUpdated();
     }
 
     @Override

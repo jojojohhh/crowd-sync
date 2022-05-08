@@ -1,5 +1,6 @@
 package com.osci.crowdsync.repository;
 
+import com.osci.crowdsync.entity.SysUser;
 import com.osci.crowdsync.entity.UserId;
 import com.osci.crowdsync.entity.UpdatedUser;
 import org.springframework.data.jpa.repository.JpaRepository;

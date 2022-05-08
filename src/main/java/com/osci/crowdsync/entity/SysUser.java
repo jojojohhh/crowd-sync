@@ -1,9 +1,6 @@
 package com.osci.crowdsync.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -15,6 +12,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @IdClass(UserId.class)
 @Table(name = "SYS_USER")
+@ToString
 public class SysUser {
 
     @Id
@@ -78,5 +76,8 @@ public class SysUser {
 
     @Column(name = "DUTY_NAME")
     private String dutyName;
+
+    @OneToOne(mappedBy = "sysUser")
+    private UpdatedUser updatedUser;
 
 }

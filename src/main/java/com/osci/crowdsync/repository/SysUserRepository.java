@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -19,9 +20,7 @@ public interface SysUserRepository extends JpaRepository<SysUser, UserId> {
     @Query(value = "SELECT * FROM SysUser", nativeQuery = true)
     Stream<SysUser> streamAll();
 
-    /*
     @Query(value = "SELECT * FROM sys_user WHERE (CORP_CODE, USER_ID) NOT IN (SELECT CORP_CODE, USER_ID from updated_user)", nativeQuery = true)
-    Stream<SysUser> streamAllNotUpdated();
-       */
+    List<SysUser> streamAllNotUpdated();
 
 }
