@@ -20,5 +20,8 @@ public interface SysUserRepository extends JpaRepository<SysUser, SysUserId> {
     @Query(value = "SELECT * FROM SysUser", nativeQuery = true)
     Stream<SysUser> streamAll();
 
+    @Query(value = "SELECT * FROM Sys_user WHERE (corpCode, userId) NOT IN (SELECT corpCode, userId from updated_user)", nativeQuery = true)
+    Stream<SysUser> streamAllNotUpdated();
+
 
 }
