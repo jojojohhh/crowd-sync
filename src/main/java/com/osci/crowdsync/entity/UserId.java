@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SysUserId implements Serializable {
+public class UserId implements Serializable {
     private String corpCode;
     private String userId;
 }

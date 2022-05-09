@@ -1,6 +1,5 @@
 package com.osci.crowdsync.dto;
 
-import com.osci.crowdsync.entity.SysUserId;
 import lombok.*;
 
 @Getter @Setter
