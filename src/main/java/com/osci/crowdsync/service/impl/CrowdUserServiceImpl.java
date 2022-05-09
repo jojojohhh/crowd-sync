@@ -39,7 +39,8 @@ public class CrowdUserServiceImpl implements CrowdUserService {
 
     @Override
     public void getCrowdUser() {
-
+        HttpHeaders httpHeaders = getDefaultHeaders();
+        //restTemplate.getForEntity()
     }
 
     @Override
