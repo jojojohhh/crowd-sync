@@ -12,7 +12,6 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @IdClass(UserId.class)
 @Table(name = "SYS_USER")
-@ToString
 public class SysUser {
 
     @Id
@@ -77,4 +76,6 @@ public class SysUser {
     @Column(name = "DUTY_NAME")
     private String dutyName;
 
+    @OneToOne(mappedBy = "sysUser")
+    private UpdatedUser updatedUser;
 }
