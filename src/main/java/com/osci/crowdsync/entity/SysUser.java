@@ -77,7 +77,4 @@ public class SysUser {
     @Column(name = "DUTY_NAME")
     private String dutyName;
 
-    @OneToOne(mappedBy = "sysUser")
-    private UpdatedUser updatedUser;
-
 }

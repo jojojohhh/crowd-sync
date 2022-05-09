@@ -6,7 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SysUserIdDto {
+public class UserIdDto {
     private String corpCode;
     private String userId;
 }
