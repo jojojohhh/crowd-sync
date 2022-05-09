@@ -3,10 +3,9 @@ package com.osci.crowdsync.service.impl;
 import com.osci.crowdsync.config.properties.AtlassianProperties;
 import com.osci.crowdsync.dto.CrowdUserDto;
 import com.osci.crowdsync.dto.SysUserDto;
-import com.osci.crowdsync.dto.SysUserIdDto;
+import com.osci.crowdsync.dto.UserIdDto;
 import com.osci.crowdsync.entity.SysUser;
 import com.osci.crowdsync.repository.SysUserRepository;
-import com.osci.crowdsync.repository.UpdatedUserRepository;
 import com.osci.crowdsync.service.CrowdUserService;
 import com.osci.crowdsync.utils.HttpHeaderBuilder;
 import lombok.RequiredArgsConstructor;
@@ -26,48 +25,63 @@ public class CrowdUserServiceImpl implements CrowdUserService {
 
     private final RestTemplate restTemplate;
     private final AtlassianProperties atlassianProperties;
-    private final String CROWD_USER_REST_API_URL = "/rest/usermanagement/1/user";
+    private final String CROWD_USER_REST_API_URI = "/rest/usermanagement/1/user";
     private final SysUserRepository sysUserRepository;
-    private final UpdatedUserRepository updatedUserRepository;
 
-    @Override
-    public SysUserDto findUserById(SysUserIdDto id) {
+    @Transactional
+    public SysUserDto findUserById(UserIdDto id) {
         return sysUserRepository.findById(id.getCorpCode(), id.getUserId())
                     .map(SysUserDto::new)
                     .orElseThrow(IllegalArgumentException::new);
     }
 
-    @Override
+    @Transactional
     public Stream<SysUserDto> findAllUsers(){
         return sysUserRepository.streamAll().map(SysUserDto::new);
     }
 
-    @Override
     @Transactional
     public List<SysUser> findAllNotUpdated() {
         return sysUserRepository.streamAllNotUpdated();
     }
 
-    @Override
-    public void getCrowdUser() {
+    public ResponseEntity<String> getCrowdUser(String username) {
         HttpHeaders httpHeaders = getDefaultHeaders();
-        //restTemplate.getForEntity()
+        HttpEntity<String> httpEntity = new HttpEntity<>("", httpHeaders);
+        final String URI = CROWD_USER_REST_API_URI + "?username=" + username;
+        log.info("Call Crowd Rest API : " + "{method=GET, url=" + URI + "}");
+        return callCrowdRestApi(atlassianProperties.getCrowd().getUrl() + URI, HttpMethod.GET, httpEntity);
     }
 
-    @Override
-    public void updateCrowdUser(CrowdUserDto userDto) {
+    public ResponseEntity<String> updateCrowdUser(CrowdUserDto userDto) {
         HttpHeaders httpHeaders = getDefaultHeaders();
-        HttpEntity<?> httpEntity = new HttpEntity<>(userDto, httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(atlassianProperties.getCrowd().getUrl() + CROWD_USER_REST_API_URL + "?username=" + userDto.getName(), HttpMethod.PUT, httpEntity, String.class);
-        log.info("status code : " + responseEntity.getStatusCodeValue());
+        HttpEntity<CrowdUserDto> httpEntity = new HttpEntity<>(userDto, httpHeaders);
+        final String URI = CROWD_USER_REST_API_URI + "?username=" + userDto.getName();
+        log.info("Call Crowd Rest API : " + "{method=PUT, url=" + URI + "}");
+        return callCrowdRestApi(atlassianProperties.getCrowd().getUrl() + URI, HttpMethod.PUT, httpEntity);
     }
 
-    @Override
-    public void createCrowdUser(CrowdUserDto userDto) {
+    public ResponseEntity<String> createCrowdUser(CrowdUserDto userDto) {
         HttpHeaders httpHeaders = getDefaultHeaders();
-        HttpEntity<?> httpEntity = new HttpEntity<>(userDto, httpHeaders);
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(atlassianProperties.getCrowd().getUrl() + CROWD_USER_REST_API_URL, httpEntity, String.class);
-        log.info("status code : " + responseEntity.getStatusCodeValue());
+        HttpEntity<CrowdUserDto> httpEntity = new HttpEntity<>(userDto, httpHeaders);
+        final String URI = CROWD_USER_REST_API_URI;
+        log.info("Call Crowd Rest API : " + "{method=POST, url=" + URI + "}");
+        return callCrowdRestApi(atlassianProperties.getCrowd().getUrl() + URI, HttpMethod.POST, httpEntity);
+    }
+
+    public ResponseEntity<String> callCrowdRestApi(String uri, HttpMethod method, HttpEntity httpEntity) {
+        ResponseEntity<String> responseEntity;
+        try {
+            responseEntity = restTemplate.exchange(uri, method, httpEntity, String.class);
+            log.info("status_code=" + responseEntity.getStatusCodeValue());
+            log.info("response_body=" + responseEntity.getBody());
+            return responseEntity;
+        } catch (Exception e) {
+            responseEntity = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            log.warn("Not found crowd user");
+            log.info("status_code=" + responseEntity.getStatusCodeValue());
+            return responseEntity;
+        }
     }
 
     public HttpHeaders getDefaultHeaders() {

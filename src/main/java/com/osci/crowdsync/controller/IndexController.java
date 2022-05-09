@@ -1,7 +1,7 @@
 package com.osci.crowdsync.controller;
 
 import com.osci.crowdsync.dto.CrowdUserDto;
-import com.osci.crowdsync.dto.SysUserIdDto;
+import com.osci.crowdsync.dto.UserIdDto;
 import com.osci.crowdsync.entity.SysUser;
 import com.osci.crowdsync.service.impl.CrowdUserServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Iterator;
 import java.util.List;
 
 @RestController
@@ -52,11 +51,15 @@ public class IndexController {
     @GetMapping("/{corpCode}/{userId}")
     public String get(@PathVariable String corpCode, @PathVariable String userId) {
         return crowdUserService.findUserById(
-                SysUserIdDto.builder()
+                UserIdDto.builder()
                         .corpCode(corpCode)
                         .userId(userId)
                         .build()
         ).toString();
+    }
+    @GetMapping("/crowd/user/{username}")
+    public String getCrowdUser(@PathVariable String username) {
+        return String.valueOf(crowdUserService.getCrowdUser(username).getStatusCodeValue());
     }
 
     @GetMapping("/all")
