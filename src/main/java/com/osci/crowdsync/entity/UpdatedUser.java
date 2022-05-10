@@ -1,17 +1,15 @@
 package com.osci.crowdsync.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.osci.crowdsync.dto.UpdatedUserDto;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @IdClass(UserId.class)
 @Table(name = "UPDATED_USER")
 public class UpdatedUser {
@@ -24,10 +22,19 @@ public class UpdatedUser {
     @Column(name = "USER_ID")
     private String userId;
 
+    @Column(name = "DISPLAY_NAME")
+    private String displayName;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumns({
             @JoinColumn(name = "CORP_CODE"),
             @JoinColumn(name = "USER_ID")
     })
     private SysUser sysUser;
+
+    public UpdatedUser(UpdatedUserDto updatedUserDto) {
+        this.corpCode = updatedUserDto.getCorpCode();
+        this.userId = updatedUserDto.getUserId();
+        this.displayName = updatedUserDto.getDisplayName();
+    }
 }
