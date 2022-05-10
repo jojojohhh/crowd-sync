@@ -9,7 +9,5 @@ public interface ReqUpdateUserService {
 
     List<ReqUpdateUserDto> findAllReqUpdateUsers();
 
-    ReqUpdateUserDto updateUserForUpdated(ReqUpdateUserDto reqUpdateUserDto);
-
     ReqUpdateUserDto updateUser(ReqUpdateUserDto reqUpdateUserDto);
 }

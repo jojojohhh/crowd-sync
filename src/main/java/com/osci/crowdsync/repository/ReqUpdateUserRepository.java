@@ -22,9 +22,6 @@ public interface ReqUpdateUserRepository extends JpaRepository<ReqUpdateUser, St
             nativeQuery = true)
     Stream<ReqUpdateUser> findAllReqUpdateUsers();
 
-    @Query(value = "UPDATE req_update_user SET updated = '1' WHERE user_id = :#{#reqUpdateUser.userId}", nativeQuery = true)
-    Optional<ReqUpdateUser> updateUserByReqUpdateUser(ReqUpdateUser reqUpdateUser);
-
     @Override
     <S extends ReqUpdateUser> S save(S entity);
 }

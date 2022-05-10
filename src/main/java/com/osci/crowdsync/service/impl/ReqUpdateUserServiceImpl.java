@@ -24,17 +24,6 @@ public class ReqUpdateUserServiceImpl implements ReqUpdateUserService {
     }
 
     @Transactional
-    public ReqUpdateUserDto updateUserForUpdated(ReqUpdateUserDto reqUpdateUserDto) {
-        return new ReqUpdateUserDto(reqUpdateUserRepository.updateUserByReqUpdateUser(ReqUpdateUser.builder()
-                .userId(reqUpdateUserDto.getUserId())
-                .displayName(reqUpdateUserDto.getDisplayName())
-                .deptCode(reqUpdateUserDto.getDeptCode())
-                .updated('1')
-                .build()
-        ).orElseThrow(PersistenceException::new));
-    }
-
-    @Transactional
     public ReqUpdateUserDto updateUser(ReqUpdateUserDto reqUpdateUserDto) {
         return new ReqUpdateUserDto(reqUpdateUserRepository.save(ReqUpdateUser.builder()
                 .userId(reqUpdateUserDto.getUserId())
