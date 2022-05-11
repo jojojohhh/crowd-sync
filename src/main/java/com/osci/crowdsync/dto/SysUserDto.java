@@ -1,13 +1,14 @@
 package com.osci.crowdsync.dto;
 
 import com.osci.crowdsync.entity.SysUser;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.sql.Timestamp;
 
 @Getter @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString
 public class SysUserDto {
     private String corpCode;

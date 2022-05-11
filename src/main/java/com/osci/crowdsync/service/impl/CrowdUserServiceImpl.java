@@ -3,8 +3,6 @@ package com.osci.crowdsync.service.impl;
 import com.osci.crowdsync.config.properties.AtlassianProperties;
 import com.osci.crowdsync.dto.CrowdUserDto;
 import com.osci.crowdsync.dto.SysUserDto;
-import com.osci.crowdsync.dto.UserIdDto;
-import com.osci.crowdsync.entity.SysUser;
 import com.osci.crowdsync.repository.SysUserRepository;
 import com.osci.crowdsync.service.CrowdUserService;
 import com.osci.crowdsync.utils.HttpHeaderBuilder;
@@ -16,8 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
+/**
+ * CrowdUserService 의 구현 클래스
+ * SysUser Entity 와 1:1 매핑되어 있고, Crowd Rest API 호출하는 메소드를 제공한다.
+ */
 @Log4j2
 @Service
 @RequiredArgsConstructor
@@ -28,62 +30,80 @@ public class CrowdUserServiceImpl implements CrowdUserService {
     private final String CROWD_USER_REST_API_URI = "/rest/usermanagement/1/user";
     private final SysUserRepository sysUserRepository;
 
+    /**
+     * SysUserRepository streamAllNotUpdated() 메소드의 리턴값인 Stream<SysUser> 을 List<SysUserDto> 으로 변환 하여준다.
+     * @return List<SysUserDto>
+     */
     @Transactional
-    public SysUserDto findUserById(UserIdDto id) {
-        return sysUserRepository.findById(id.getCorpCode(), id.getUserId())
-                    .map(SysUserDto::new)
-                    .orElseThrow(IllegalArgumentException::new);
+    public List<SysUserDto> findAllNotUpdated() {
+        return sysUserRepository.streamAllNotUpdated().map(SysUserDto::new).collect(Collectors.toList());
     }
 
-    @Transactional
-    public Stream<SysUserDto> findAllUsers(){
-        return sysUserRepository.streamAll().map(SysUserDto::new);
-    }
-
-    @Transactional
-    public List<SysUser> findAllNotUpdated() {
-        return sysUserRepository.streamAllNotUpdated();
-    }
-
-    public ResponseEntity<String> getCrowdUser(String username) {
+    /**
+     * Crowd Get User Rest API 호출 결과를 리턴한다.
+     * @param username - Crowd 사용자의 username
+     * @return ResponseEntity<CrowdUserDto>
+     */
+    public ResponseEntity<CrowdUserDto> getCrowdUser(String username) {
         HttpHeaders httpHeaders = getDefaultHeaders();
         HttpEntity<String> httpEntity = new HttpEntity<>("", httpHeaders);
         final String URI = CROWD_USER_REST_API_URI + "?username=" + username;
-        log.info("Call Crowd Rest API : " + "{method=GET, url=" + URI + "}");
+        log.info("Call Crowd Rest API : " + "{method=GET, uri=" + URI + "}");
         return callCrowdRestApi(atlassianProperties.getCrowd().getUrl() + URI, HttpMethod.GET, httpEntity);
     }
 
-    public ResponseEntity<String> updateCrowdUser(CrowdUserDto userDto) {
+    /**
+     * Crowd update user Rest API 호출 결과를 리턴한다.
+     * @param userDto - Crowd update user Rest API Request Body
+     * @return ResponseEntity<CrowdUserDto>
+     */
+    public ResponseEntity<CrowdUserDto> updateCrowdUser(CrowdUserDto userDto) {
         HttpHeaders httpHeaders = getDefaultHeaders();
         HttpEntity<CrowdUserDto> httpEntity = new HttpEntity<>(userDto, httpHeaders);
         final String URI = CROWD_USER_REST_API_URI + "?username=" + userDto.getName();
-        log.info("Call Crowd Rest API : " + "{method=PUT, url=" + URI + "}");
+        log.info("Call Crowd Rest API : " + "{method=PUT, uri=" + URI + "}");
         return callCrowdRestApi(atlassianProperties.getCrowd().getUrl() + URI, HttpMethod.PUT, httpEntity);
     }
 
-    public ResponseEntity<String> createCrowdUser(CrowdUserDto userDto) {
+    /**
+     * Crowd add user Rest API 호출 결과를 리턴한다.
+     * @param userDto - Crowd add user Rest API Request Body
+     * @return ResponseEntity<CrowdUserDto>
+     */
+    public ResponseEntity<CrowdUserDto> createCrowdUser(CrowdUserDto userDto) {
         HttpHeaders httpHeaders = getDefaultHeaders();
         HttpEntity<CrowdUserDto> httpEntity = new HttpEntity<>(userDto, httpHeaders);
         final String URI = CROWD_USER_REST_API_URI;
-        log.info("Call Crowd Rest API : " + "{method=POST, url=" + URI + "}");
+        log.info("Call Crowd Rest API : " + "{method=POST, uri=" + URI + "}");
         return callCrowdRestApi(atlassianProperties.getCrowd().getUrl() + URI, HttpMethod.POST, httpEntity);
     }
 
-    public ResponseEntity<String> callCrowdRestApi(String uri, HttpMethod method, HttpEntity httpEntity) {
-        ResponseEntity<String> responseEntity;
+    /**
+     * RestTemplate 클래스를 활용하여 Crowd Rest API 를 호출하는 메소드
+     * @param uri - Rest API uri
+     * @param method - HttpMethod type (ex. GET, POST, PUT, DELETE)
+     * @param httpEntity - Rest API Request HttpEntity, Header 정보와 Request Body 정보가 포함되어있음
+     * @return ResponseEntity<CrowdUserDto>
+     */
+    public ResponseEntity<CrowdUserDto> callCrowdRestApi(String uri, HttpMethod method, HttpEntity httpEntity) {
+        ResponseEntity<CrowdUserDto> responseEntity;
         try {
-            responseEntity = restTemplate.exchange(uri, method, httpEntity, String.class);
+            responseEntity = restTemplate.exchange(uri, method, httpEntity, CrowdUserDto.class);
             log.info("status_code=" + responseEntity.getStatusCodeValue());
-            log.info("response_body=" + responseEntity.getBody());
+            if (!responseEntity.getStatusCode().equals(HttpStatus.NO_CONTENT))   log.info("response_body=" + responseEntity.getBody().toString());
             return responseEntity;
         } catch (Exception e) {
             responseEntity = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            log.warn("Not found crowd user");
-            log.info("status_code=" + responseEntity.getStatusCodeValue());
+            log.warn("exception_message=" + e.getMessage());
             return responseEntity;
         }
     }
 
+    /**
+     * 기본 HttpHeaders 를 가져오는 메소드
+     * Crowd Application jira 에 대한 Basic Auth 를 세팅한다.
+     * @return HttpHeaders
+     */
     public HttpHeaders getDefaultHeaders() {
         return HttpHeaderBuilder.builder()
                 .mediaType(MediaType.APPLICATION_JSON)

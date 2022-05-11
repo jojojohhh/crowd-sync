@@ -7,6 +7,10 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+
+/**
+ * SYS_USER, UPDATED_USER, REQ_UPDATE_USER 테이블이 공통으로 갖는 PK CLASS
+ */
 @Getter
 @Builder
 @NoArgsConstructor

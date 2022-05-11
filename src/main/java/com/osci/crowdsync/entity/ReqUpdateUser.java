@@ -4,6 +4,9 @@ import lombok.*;
 
 import javax.persistence.*;
 
+/**
+ * REQ_UPDATED_USER 테이블 Entity Class
+ */
 @Entity
 @Getter
 @Builder

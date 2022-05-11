@@ -1,15 +1,13 @@
 package com.osci.crowdsync.controller;
 
 import com.osci.crowdsync.dto.CrowdUserDto;
-import com.osci.crowdsync.dto.UserIdDto;
-import com.osci.crowdsync.entity.SysUser;
-import com.osci.crowdsync.service.impl.CrowdUserServiceImpl;
+import com.osci.crowdsync.dto.SysUserDto;
+import com.osci.crowdsync.service.CrowdUserService;
+import com.osci.crowdsync.service.ReqUpdateUserService;
+import com.osci.crowdsync.service.UpdatedUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,7 +16,17 @@ import java.util.List;
 @Log4j2
 public class IndexController {
 
-    private final CrowdUserServiceImpl crowdUserService;
+    private final CrowdUserService crowdUserService;
+    private final UpdatedUserService updatedUserService;
+    private final ReqUpdateUserService reqUpdateUserService;
+
+    @GetMapping("/test")
+    public String findReq() {
+        reqUpdateUserService.findAllReqUpdateUsers().forEach(reqUpdateUserDto -> {
+            log.info(reqUpdateUserDto.toString());
+        });
+        return "true";
+    }
 
     @RequestMapping("/update")
     public String update() {
@@ -48,23 +56,9 @@ public class IndexController {
         return "index";
     }
 
-    @GetMapping("/{corpCode}/{userId}")
-    public String get(@PathVariable String corpCode, @PathVariable String userId) {
-        return crowdUserService.findUserById(
-                UserIdDto.builder()
-                        .corpCode(corpCode)
-                        .userId(userId)
-                        .build()
-        ).toString();
-    }
-    @GetMapping("/crowd/user/{username}")
-    public String getCrowdUser(@PathVariable String username) {
-        return String.valueOf(crowdUserService.getCrowdUser(username).getStatusCodeValue());
-    }
-
     @GetMapping("/all")
     public String getNotUpdatedAllUsers() {
-        List<SysUser> users = crowdUserService.findAllNotUpdated();
+        List<SysUserDto> users = crowdUserService.findAllNotUpdated();
         for (int i = 0; i < users.size(); i++) {
             log.warn(users.get(i).toString());
         }

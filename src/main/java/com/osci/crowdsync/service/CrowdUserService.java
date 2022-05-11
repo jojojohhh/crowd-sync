@@ -2,24 +2,17 @@ package com.osci.crowdsync.service;
 
 import com.osci.crowdsync.dto.CrowdUserDto;
 import com.osci.crowdsync.dto.SysUserDto;
-import com.osci.crowdsync.dto.UserIdDto;
-import com.osci.crowdsync.entity.SysUser;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 public interface CrowdUserService {
 
-    SysUserDto findUserById(UserIdDto id);
+    List<SysUserDto> findAllNotUpdated();
 
-    Stream<SysUserDto> findAllUsers();
+    ResponseEntity<CrowdUserDto> getCrowdUser(String username);
 
-    List<SysUser> findAllNotUpdated();
+    ResponseEntity<CrowdUserDto> updateCrowdUser(CrowdUserDto userDto);
 
-    ResponseEntity<String> getCrowdUser(String username);
-
-    ResponseEntity<String> updateCrowdUser(CrowdUserDto userDto);
-
-    ResponseEntity<String> createCrowdUser(CrowdUserDto userDto);
+    ResponseEntity<CrowdUserDto> createCrowdUser(CrowdUserDto userDto);
 }

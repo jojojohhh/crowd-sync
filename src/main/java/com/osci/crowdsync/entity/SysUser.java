@@ -5,11 +5,14 @@ import lombok.*;
 import javax.persistence.*;
 import java.sql.Timestamp;
 
+/**
+ * SYS_USER 테이블 Entity Class
+ */
 @Entity
 @Getter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @IdClass(UserId.class)
 @Table(name = "SYS_USER")
 public class SysUser {
@@ -78,4 +81,7 @@ public class SysUser {
 
     @OneToOne(mappedBy = "sysUser")
     private UpdatedUser updatedUser;
+
+    @OneToOne(mappedBy = "sysUser")
+    private ReqUpdateUser reqUpdateUser;
 }

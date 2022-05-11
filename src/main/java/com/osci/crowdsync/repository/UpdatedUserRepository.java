@@ -5,10 +5,18 @@ import com.osci.crowdsync.entity.UserId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
+/**
+ * UPDATED_USER 테이블에 대한 JPARepository
+ */
 @Repository
 public interface UpdatedUserRepository extends JpaRepository<UpdatedUser, UserId> {
+
+    /**
+     * CRUDRepository save 메소드
+     * @param entity must not be {@literal null}.
+     * @return UpdatedUser entity
+     * @param <S> UpdatedUser
+     */
     @Override
     <S extends UpdatedUser> S save(S entity);
 }
