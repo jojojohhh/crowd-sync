@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CrowdUserService {
 
-    List<SysUserDto> findAllNotUpdated();
+    List<SysUserDto> getAll();
 
     ResponseEntity<CrowdUserDto> getCrowdUser(String username);
 

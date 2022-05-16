@@ -31,12 +31,12 @@ public class CrowdUserServiceImpl implements CrowdUserService {
     private final SysUserRepository sysUserRepository;
 
     /**
-     * SysUserRepository streamAllNotUpdated() 메소드의 리턴값인 Stream<SysUser> 을 List<SysUserDto> 으로 변환 하여준다.
+     * Display Name 을 업데이트 해야하는 사용자 리스트를 리턴한다.
      * @return List<SysUserDto>
      */
     @Transactional
-    public List<SysUserDto> findAllNotUpdated() {
-        return sysUserRepository.streamAllNotUpdated().map(SysUserDto::new).collect(Collectors.toList());
+    public List<SysUserDto> getAll() {
+        return sysUserRepository.getAllUsers().map(SysUserDto::new).collect(Collectors.toList());
     }
 
     /**
@@ -107,7 +107,7 @@ public class CrowdUserServiceImpl implements CrowdUserService {
     public HttpHeaders getDefaultHeaders() {
         return HttpHeaderBuilder.builder()
                 .mediaType(MediaType.APPLICATION_JSON)
-                .basicAuth(atlassianProperties.getJira().getUsername(), atlassianProperties.getJira().getPassword())
+                .basicAuth(atlassianProperties.getApplication().getUsername(), atlassianProperties.getApplication().getPassword())
                 .cacheControl("no-cache")
                 .build();
     }
