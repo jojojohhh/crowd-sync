@@ -15,16 +15,16 @@ import java.util.stream.Stream;
 public interface SysUserRepository extends JpaRepository<SysUser, UserId> {
 
     /**
-     * updated_user 테이블에 존재하지 않으면 select
+     * Display Name 을 업데이트 해야하는 사용자 리스트를 select
+     * sys_user, updated_user, crowd_username_custom 세개의 테이블을 모두 left join
      * Mysql Query 로 작성되어짐
      * @return SysUser 타입의 Stream
      */
-    @Query(value = "SELECT * " +
-            "FROM sys_user " +
-            "WHERE (CORP_CODE, USER_ID) NOT IN (" +
-                "SELECT CORP_CODE, USER_ID " +
-                "FROM updated_user)",
+    @Query(value = "select * " +
+                   "from sys_user s left join updated_user u on s.corp_code = u.corp_code and s.user_id = u.user_id " +
+                                   "left join crowd_username_custom c on s.corp_code = c.corp_code and s.user_id = c.user_id " +
+                   "where u.user_id is null or (c.user_custom_name is not null and u.display_name != c.user_custom_name) or (s.name != u.name or s.dept_name != u.dept_name or s.pos_name != u.pos_name)",
             nativeQuery = true)
-    Stream<SysUser> streamAllNotUpdated();
+    Stream<SysUser> getAllUsers();
 
 }

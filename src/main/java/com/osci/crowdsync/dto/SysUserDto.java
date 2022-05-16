@@ -4,7 +4,6 @@ import com.osci.crowdsync.entity.SysUser;
 import lombok.*;
 
 import java.sql.Timestamp;
-
 @Getter @Setter
 @Builder
 @AllArgsConstructor
@@ -30,6 +29,8 @@ public class SysUserDto {
     private Timestamp uptDate;
     private String dutyCode;
     private String dutyName;
+    private UpdatedUserDto updatedUserDto;
+    private CrowdUsernameCustomDto crowdUsernameCustomDto;
 
     public SysUserDto(SysUser sysUser) {
         this.corpCode = sysUser.getCorpCode();
@@ -51,5 +52,7 @@ public class SysUserDto {
         this.uptDate = sysUser.getUptDate();
         this.dutyCode = sysUser.getDutyCode();
         this.dutyName = sysUser.getDutyName();
+        this.updatedUserDto = sysUser.getUpdatedUser() == null ? new UpdatedUserDto() : new UpdatedUserDto(sysUser.getUpdatedUser());
+        this.crowdUsernameCustomDto = sysUser.getCrowdUsernameCustom() == null ? new CrowdUsernameCustomDto() : new CrowdUsernameCustomDto(sysUser.getCrowdUsernameCustom());
     }
 }

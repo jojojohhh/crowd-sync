@@ -79,9 +79,17 @@ public class SysUser {
     @Column(name = "DUTY_NAME")
     private String dutyName;
 
-    @OneToOne(mappedBy = "sysUser")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "CORP_CODE"),
+            @JoinColumn(name = "USER_ID")
+    })
     private UpdatedUser updatedUser;
 
-    @OneToOne(mappedBy = "sysUser")
-    private ReqUpdateUser reqUpdateUser;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "CORP_CODE"),
+            @JoinColumn(name = "USER_ID")
+    })
+    private CrowdUsernameCustom crowdUsernameCustom;
 }
