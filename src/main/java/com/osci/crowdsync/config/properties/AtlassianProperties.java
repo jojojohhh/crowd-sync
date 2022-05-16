@@ -16,24 +16,13 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConfigurationProperties("atlassian")
 public class AtlassianProperties {
 
-    private final String baseurl;
-    private final Jira jira;
-    private final Wiki wiki;
+    private final Application application;
     private final Crowd crowd;
 
 
     @Getter
     @RequiredArgsConstructor
-    public static final class Jira {
-        private final String url;
-        private final String username;
-        private final String password;
-    }
-
-    @Getter
-    @RequiredArgsConstructor
-    public static final class Wiki {
-        private final String url;
+    public static final class Application {
         private final String username;
         private final String password;
     }
@@ -42,7 +31,5 @@ public class AtlassianProperties {
     @RequiredArgsConstructor
     public static final class Crowd {
         private final String url;
-        private final String username;
-        private final String password;
     }
 }
