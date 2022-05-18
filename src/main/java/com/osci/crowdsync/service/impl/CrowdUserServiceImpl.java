@@ -2,8 +2,14 @@ package com.osci.crowdsync.service.impl;
 
 import com.osci.crowdsync.config.properties.AtlassianProperties;
 import com.osci.crowdsync.dto.CrowdUserDto;
+import com.osci.crowdsync.dto.CrowdUsernameCustomDto;
 import com.osci.crowdsync.dto.SysUserDto;
+import com.osci.crowdsync.dto.UpdatedUserDto;
+import com.osci.crowdsync.entity.CrowdUsernameCustom;
+import com.osci.crowdsync.entity.UpdatedUser;
+import com.osci.crowdsync.repository.CrowdUsernameCustomRepository;
 import com.osci.crowdsync.repository.SysUserRepository;
+import com.osci.crowdsync.repository.UpdatedUserRepository;
 import com.osci.crowdsync.service.CrowdUserService;
 import com.osci.crowdsync.utils.HttpHeaderBuilder;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.persistence.PersistenceException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +36,8 @@ public class CrowdUserServiceImpl implements CrowdUserService {
     private final AtlassianProperties atlassianProperties;
     private final String CROWD_USER_REST_API_URI = "/rest/usermanagement/1/user";
     private final SysUserRepository sysUserRepository;
+    private final UpdatedUserRepository updatedUserRepository;
+    private final CrowdUsernameCustomRepository crowdUsernameCustomRepository;
 
     /**
      * Display Name 을 업데이트 해야하는 사용자 리스트를 리턴한다.
@@ -37,6 +46,22 @@ public class CrowdUserServiceImpl implements CrowdUserService {
     @Transactional
     public List<SysUserDto> getAll() {
         return sysUserRepository.getAllUsers().map(SysUserDto::new).collect(Collectors.toList());
+    }
+
+    public void saveUser(UpdatedUserDto updatedUserDto, CrowdUsernameCustomDto usernameCustomDto) {
+        if (usernameCustomDto == null)  save(updatedUserDto);
+        else save(updatedUserDto, usernameCustomDto);
+    }
+
+    @Transactional
+    public void save(UpdatedUserDto updatedUserDto) {
+        updatedUserRepository.save(new UpdatedUser(updatedUserDto));
+    }
+
+    @Transactional
+    public void save(UpdatedUserDto updatedUserDto, CrowdUsernameCustomDto usernameCustomDto) {
+        updatedUserRepository.save(new UpdatedUser(updatedUserDto));
+        crowdUsernameCustomRepository.save(new CrowdUsernameCustom(usernameCustomDto));
     }
 
     /**
