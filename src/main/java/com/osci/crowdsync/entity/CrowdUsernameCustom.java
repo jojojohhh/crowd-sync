@@ -16,6 +16,7 @@ import javax.persistence.*;
 @IdClass(UserId.class)
 @Table(name = "CROWD_USERNAME_CUSTOM")
 public class CrowdUsernameCustom {
+
     @Id
     @Column(name = "CORP_CODE")
     private String corpCode;
@@ -37,5 +38,6 @@ public class CrowdUsernameCustom {
         this.corpCode = crowdUsernameCustomDto.getCorpCode();
         this.userId = crowdUsernameCustomDto.getUserId();
         this.userCustomName = crowdUsernameCustomDto.getUserCustomName();
+        this.chkYn = crowdUsernameCustomDto.getChkYn();
     }
 }
