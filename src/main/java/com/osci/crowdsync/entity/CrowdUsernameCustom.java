@@ -27,6 +27,9 @@ public class CrowdUsernameCustom {
     @Column(name = "USER_CUSTOM_NAME")
     private String userCustomName;
 
+    @Column(name = "CHK_YN")
+    private String chkYn;
+
     @OneToOne(mappedBy = "crowdUsernameCustom")
     private SysUser sysUser;
 
