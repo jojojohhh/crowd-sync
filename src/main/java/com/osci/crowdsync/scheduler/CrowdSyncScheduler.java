@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.PersistenceException;
 
+
 @Log4j2
 @RequiredArgsConstructor
 @Component
@@ -27,27 +28,22 @@ public class CrowdSyncScheduler {
      */
     @Scheduled(cron = "${scheduler.cron}")
     public void crowdSyncJob() {
-        log.info("Crowd display name update scheduler start (default format : name/pos_name/dept_name)");
+        log.info("Crowd display name update scheduler start (default format : name pos_name / dept_name)");
 
-        crowdUserService.getAll().forEach(sysUser -> {
+        crowdUserService.getUserReqUpdate().forEach(userDto -> {
             boolean isCustom = false;
-            UpdatedUserDto updatedUser = sysUser.getUpdatedUserDto();
-            CrowdUsernameCustomDto usernameCustom = sysUser.getCrowdUsernameCustomDto();
-
-            if (updatedUser.getUserId() == null) {
-                isCustom = usernameCustom.getUserCustomName() != null;
+            if (userDto.getUpdatedUserDisplayName() == null) {
+                isCustom = userDto.getUserCustomName() != null;
             } else {
-                if (usernameCustom.getUserCustomName() != null) isCustom = !updatedUser.getDisplayName().equals(usernameCustom.getUserCustomName());
+                if (userDto.getUserCustomName() != null)    isCustom = userDto.isChkYn() || !userDto.getUpdatedUserDisplayName().equals(userDto.getUserCustomName());
             }
 
-            String displayName;
-            if (isCustom)   displayName = usernameCustom.getUserCustomName();
-            else    displayName = sysUser.getName() + " / " + sysUser.getPosName() + " / " + sysUser.getDeptName();
+            String displayName = isCustom ? userDto.getUserCustomName() : userDto.getName() + " " + userDto.getPosName() + " / " + userDto.getDeptName();
 
-            ResponseEntity<CrowdUserDto> res = crowdUserService.getCrowdUser(sysUser.getUserId());
+            ResponseEntity<CrowdUserDto> res = crowdUserService.getCrowdUser(userDto.getUserId());
             CrowdUserDto resBody = res.getBody();
 
-            log.info("User(userId=" + sysUser.getUserId() + ")");
+            log.info("User(userId=" + userDto.getUserId() + ")");
             ResponseEntity<CrowdUserDto> updateOrCreateRes;
             CrowdUserDto crowdUserDto;
             if (!res.getStatusCode().isError()) {
@@ -55,9 +51,9 @@ public class CrowdSyncScheduler {
                 crowdUserDto = CrowdUserDto.builder()
                         .name(resBody.getName())
                         .password(new CrowdUserDto.Password())
-                        .firstName(sysUser.getName())
-                        .lastName(sysUser.getName())
-                        .email(sysUser.getEmail())
+                        .firstName(userDto.getName())
+                        .lastName(userDto.getName())
+                        .email(userDto.getEmail())
                         .displayName(displayName)
                         .active(true)
                         .build();
@@ -65,11 +61,11 @@ public class CrowdSyncScheduler {
             } else {
                 log.info("Create User(display-name: " + displayName + ")");
                 crowdUserDto = CrowdUserDto.builder()
-                        .name(sysUser.getUserId())
+                        .name(userDto.getUserId())
                         .password(new CrowdUserDto.Password())
-                        .firstName(sysUser.getName())
-                        .lastName(sysUser.getName())
-                        .email(sysUser.getEmail())
+                        .firstName(userDto.getName())
+                        .lastName(userDto.getName())
+                        .email(userDto.getEmail())
                         .displayName(displayName)
                         .active(true)
                         .build();
@@ -77,24 +73,25 @@ public class CrowdSyncScheduler {
             }
 
             if (!updateOrCreateRes.getStatusCode().isError()) {
-                log.info("updated_user and crowd_username_custom table upsert row. User(corp_code=" + sysUser.getCorpCode() + ", user_id=" + sysUser.getUserId() + ")");
+                log.info("updated_user and crowd_username_custom table upsert row. User(corp_code=" + userDto.getCorpCode() + ", user_id=" + userDto.getUserId() + ")");
                 UpdatedUserDto updatedUserDto = UpdatedUserDto.builder()
-                        .corpCode(sysUser.getCorpCode())
-                        .userId(sysUser.getUserId())
-                        .name(sysUser.getName())
-                        .deptName(sysUser.getDeptName())
-                        .posName(sysUser.getPosName())
+                        .corpCode(userDto.getCorpCode())
+                        .userId(userDto.getUserId())
+                        .name(userDto.getName())
+                        .deptName(userDto.getDeptName())
+                        .posName(userDto.getPosName())
                         .firstName(crowdUserDto.getFirstName())
                         .lastName(crowdUserDto.getLastName())
                         .emailAddress(crowdUserDto.getEmail())
                         .displayName(displayName)
                         .build();
-                CrowdUsernameCustomDto crowdUsernameCustomDto = usernameCustom.getCorpCode() == null ?
+                CrowdUsernameCustomDto crowdUsernameCustomDto = userDto.isChkYn() ?
+                        null : userDto.getUserCustomName() == null ?
                         null : CrowdUsernameCustomDto.builder()
-                        .corpCode(usernameCustom.getCorpCode())
-                        .userId(usernameCustom.getUserId())
-                        .userCustomName(displayName)
-                        .build();
+                            .corpCode(userDto.getCorpCode())
+                            .userId(userDto.getUserId())
+                            .userCustomName(displayName)
+                            .build();
                 try {
                     crowdUserService.saveUser(updatedUserDto, crowdUsernameCustomDto);
                 } catch (PersistenceException | DataAccessException e) {
@@ -102,7 +99,7 @@ public class CrowdSyncScheduler {
                     log.error("exception reason : " + e.getMessage());
                 }
             } else {
-                log.error("Can not create or update User(userId=" + sysUser.getUserId() + ")");
+                log.error("Can not create or update User(userId=" + userDto.getUserId() + ")");
                 log.error("status code : " + updateOrCreateRes.getStatusCodeValue() + ", reason phrase : " + updateOrCreateRes.getStatusCode().getReasonPhrase());
             }
         });
