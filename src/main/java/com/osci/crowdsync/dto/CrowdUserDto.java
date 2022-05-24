@@ -25,6 +25,8 @@ public class CrowdUserDto {
 
     private String email;
 
+    private boolean active;
+
     @Getter
     public static class Password {
         private String value;
