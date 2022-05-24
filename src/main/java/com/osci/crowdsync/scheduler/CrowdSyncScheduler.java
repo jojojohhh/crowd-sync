@@ -57,8 +57,9 @@ public class CrowdSyncScheduler {
                         .password(new CrowdUserDto.Password())
                         .firstName(sysUser.getName())
                         .lastName(sysUser.getName())
-                        .email(resBody.getEmail())
+                        .email(sysUser.getEmail())
                         .displayName(displayName)
+                        .active(true)
                         .build();
                 updateOrCreateRes = crowdUserService.updateCrowdUser(crowdUserDto);
             } else {
@@ -70,6 +71,7 @@ public class CrowdSyncScheduler {
                         .lastName(sysUser.getName())
                         .email(sysUser.getEmail())
                         .displayName(displayName)
+                        .active(true)
                         .build();
                 updateOrCreateRes = crowdUserService.createCrowdUser(crowdUserDto);
             }

@@ -8,7 +8,6 @@ import com.osci.crowdsync.dto.UpdatedUserDto;
 import com.osci.crowdsync.entity.CrowdUsernameCustom;
 import com.osci.crowdsync.entity.UpdatedUser;
 import com.osci.crowdsync.repository.CrowdUsernameCustomRepository;
-import com.osci.crowdsync.repository.SysUserRepository;
 import com.osci.crowdsync.repository.UpdatedUserRepository;
 import com.osci.crowdsync.service.CrowdUserService;
 import com.osci.crowdsync.utils.HttpHeaderBuilder;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import javax.persistence.PersistenceException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,18 +33,9 @@ public class CrowdUserServiceImpl implements CrowdUserService {
     private final RestTemplate restTemplate;
     private final AtlassianProperties atlassianProperties;
     private final String CROWD_USER_REST_API_URI = "/rest/usermanagement/1/user";
-    private final SysUserRepository sysUserRepository;
     private final UpdatedUserRepository updatedUserRepository;
     private final CrowdUsernameCustomRepository crowdUsernameCustomRepository;
 
-    /**
-     * Display Name 을 업데이트 해야하는 사용자 리스트를 리턴한다.
-     * @return List<SysUserDto>
-     */
-    @Transactional
-    public List<SysUserDto> getAll() {
-        return sysUserRepository.getAllUsers().map(SysUserDto::new).collect(Collectors.toList());
-    }
 
     public void saveUser(UpdatedUserDto updatedUserDto, CrowdUsernameCustomDto usernameCustomDto) {
         if (usernameCustomDto == null)  save(updatedUserDto);
@@ -101,6 +90,19 @@ public class CrowdUserServiceImpl implements CrowdUserService {
         final String URI = CROWD_USER_REST_API_URI;
         log.info("Call Crowd Rest API : " + "{method=POST, uri=" + URI + "}");
         return callCrowdRestApi(atlassianProperties.getCrowd().getUrl() + URI, HttpMethod.POST, httpEntity);
+    }
+
+    /**
+     * Crowd delete Rest API 호출 결과를 리턴한다.
+     * @param username - query parameter
+     * @return ResponseEntity<CrowdUserDto>
+     */
+    public ResponseEntity<CrowdUserDto> deleteCrowdUser(String username) {
+        HttpHeaders httpHeaders = getDefaultHeaders();
+        HttpEntity<String> httpEntity = new HttpEntity<>("", httpHeaders);
+        final String URI = CROWD_USER_REST_API_URI + "?username=" + username;
+        log.info("Call Crowd Rest API : " + "{method=DELETE, uri=" + URI + "}");
+        return callCrowdRestApi(atlassianProperties.getCrowd().getUrl() + URI, HttpMethod.DELETE, httpEntity);
     }
 
     /**

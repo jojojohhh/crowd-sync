@@ -10,8 +10,6 @@ import java.util.List;
 
 public interface CrowdUserService {
 
-    List<SysUserDto> getAll();
-
     void saveUser(UpdatedUserDto updatedUserDto, CrowdUsernameCustomDto usernameCustomDto);
 
     void save(UpdatedUserDto updatedUserDto);
@@ -23,4 +21,6 @@ public interface CrowdUserService {
     ResponseEntity<CrowdUserDto> updateCrowdUser(CrowdUserDto userDto);
 
     ResponseEntity<CrowdUserDto> createCrowdUser(CrowdUserDto userDto);
+
+    ResponseEntity<CrowdUserDto> deleteCrowdUser(String username);
 }
