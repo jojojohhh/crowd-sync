@@ -1,14 +1,13 @@
 package com.osci.crowdsync.service;
 
-import com.osci.crowdsync.dto.CrowdUserDto;
-import com.osci.crowdsync.dto.CrowdUsernameCustomDto;
-import com.osci.crowdsync.dto.SysUserDto;
-import com.osci.crowdsync.dto.UpdatedUserDto;
+import com.osci.crowdsync.dto.*;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface CrowdUserService {
+
+    List<UserDto> getUserReqUpdate();
 
     void saveUser(UpdatedUserDto updatedUserDto, CrowdUsernameCustomDto usernameCustomDto);
 

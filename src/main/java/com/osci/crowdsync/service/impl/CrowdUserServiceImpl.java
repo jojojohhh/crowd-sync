@@ -1,14 +1,12 @@
 package com.osci.crowdsync.service.impl;
 
 import com.osci.crowdsync.config.properties.AtlassianProperties;
-import com.osci.crowdsync.dto.CrowdUserDto;
-import com.osci.crowdsync.dto.CrowdUsernameCustomDto;
-import com.osci.crowdsync.dto.SysUserDto;
-import com.osci.crowdsync.dto.UpdatedUserDto;
+import com.osci.crowdsync.dto.*;
 import com.osci.crowdsync.entity.CrowdUsernameCustom;
 import com.osci.crowdsync.entity.UpdatedUser;
 import com.osci.crowdsync.repository.CrowdUsernameCustomRepository;
 import com.osci.crowdsync.repository.UpdatedUserRepository;
+import com.osci.crowdsync.repository.UserReqUpdateRepository;
 import com.osci.crowdsync.service.CrowdUserService;
 import com.osci.crowdsync.utils.HttpHeaderBuilder;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * CrowdUserService 의 구현 클래스
@@ -35,7 +32,11 @@ public class CrowdUserServiceImpl implements CrowdUserService {
     private final String CROWD_USER_REST_API_URI = "/rest/usermanagement/1/user";
     private final UpdatedUserRepository updatedUserRepository;
     private final CrowdUsernameCustomRepository crowdUsernameCustomRepository;
+    private final UserReqUpdateRepository userReqUpdateRepository;
 
+    public List<UserDto> getUserReqUpdate() {
+        return userReqUpdateRepository.findUserRequireUpdate();
+    }
 
     public void saveUser(UpdatedUserDto updatedUserDto, CrowdUsernameCustomDto usernameCustomDto) {
         if (usernameCustomDto == null)  save(updatedUserDto);
