@@ -22,8 +22,8 @@ public class CrowdSyncScheduler {
     private final CrowdUserService crowdUserService;
 
     /**
-     * Crowd display name 을 업데이트 하기 위한 스케줄러 cron expression 으로 동작한다.
-     * 기본 Display Name : 이름/직책/부서
+     * Crowd display name 을 업데이트 및 비활성 사용자에 대해 Crowd 계정을 삭제하는 스케줄러, cron expression 으로 동작한다.
+     * 기본 Display Name : 이름 직책 / 부서
      * 커스텀 Display Name : CROWD_USERNAME_CUSTOM 테이블의 USER_CUSTOM_NAME column 참조
      */
     @Scheduled(cron = "${scheduler.cron}")
@@ -35,15 +35,16 @@ public class CrowdSyncScheduler {
             if (userDto.getUpdatedUserDisplayName() == null) {
                 isCustom = userDto.getUserCustomName() != null;
             } else {
-                if (userDto.getUserCustomName() != null)    isCustom = userDto.isChkYn() || !userDto.getUpdatedUserDisplayName().equals(userDto.getUserCustomName());
+                if (userDto.getUserCustomName() != null)    isCustom = !userDto.getUpdatedUserDisplayName().equals(userDto.getUserCustomName());
             }
 
             String displayName = isCustom ? userDto.getUserCustomName() : userDto.getName() + " " + userDto.getPosName() + " / " + userDto.getDeptName();
 
+            log.info("User(userId=" + userDto.getUserId() + ") displayName(displayName=" + displayName + ", isCustom=" + isCustom +  ")");
+
             ResponseEntity<CrowdUserDto> res = crowdUserService.getCrowdUser(userDto.getUserId());
             CrowdUserDto resBody = res.getBody();
 
-            log.info("User(userId=" + userDto.getUserId() + ")");
             ResponseEntity<CrowdUserDto> updateOrCreateRes;
             CrowdUserDto crowdUserDto;
             if (!res.getStatusCode().isError()) {
@@ -84,13 +85,14 @@ public class CrowdSyncScheduler {
                         .lastName(crowdUserDto.getLastName())
                         .emailAddress(crowdUserDto.getEmail())
                         .displayName(displayName)
+                        .active("Y")
                         .build();
-                CrowdUsernameCustomDto crowdUsernameCustomDto = userDto.isChkYn() ?
-                        null : userDto.getUserCustomName() == null ?
+                CrowdUsernameCustomDto crowdUsernameCustomDto = userDto.getUserCustomName() == null ?
                         null : CrowdUsernameCustomDto.builder()
                             .corpCode(userDto.getCorpCode())
                             .userId(userDto.getUserId())
                             .userCustomName(displayName)
+                            .chkYn("N")
                             .build();
                 try {
                     crowdUserService.saveUser(updatedUserDto, crowdUsernameCustomDto);
@@ -104,5 +106,34 @@ public class CrowdSyncScheduler {
             }
         });
         log.info("Crowd display name update schedule end");
+        log.info("Inactive User delete crowd account schedule start");
+
+        crowdUserService.getInactiveUsers().forEach(inactiveUserDto -> {
+            log.info("User(userId=" + inactiveUserDto.getUserId() + ") delete");
+            ResponseEntity<CrowdUserDto> res = crowdUserService.deleteCrowdUser(inactiveUserDto.getUserId());
+            if (!res.getStatusCode().isError()) {
+                UpdatedUserDto updatedUserDto = UpdatedUserDto.builder()
+                        .corpCode(inactiveUserDto.getCorpCode())
+                        .userId(inactiveUserDto.getUserId())
+                        .name(inactiveUserDto.getName())
+                        .deptName(inactiveUserDto.getDeptName())
+                        .posName(inactiveUserDto.getPosName())
+                        .firstName(inactiveUserDto.getFirstName())
+                        .lastName(inactiveUserDto.getLastName())
+                        .emailAddress(inactiveUserDto.getEmail())
+                        .displayName(inactiveUserDto.getDisplayName())
+                        .active("N")
+                        .build();
+                try {
+                    crowdUserService.saveUser(updatedUserDto, null);
+                } catch (PersistenceException | DataAccessException e) {
+                    log.error("Can not upsert updated_user table.");
+                    log.error("exception reason : " + e.getMessage());
+                }
+            } else {
+                log.error("Can not delete User(userId=" + inactiveUserDto.getUserId() + ")");
+            }
+        });
+        log.info("Inactive User delete crowd account schedule end");
     }
 }

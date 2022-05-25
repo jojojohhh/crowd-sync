@@ -9,11 +9,9 @@ public interface CrowdUserService {
 
     List<UserDto> getUserReqUpdate();
 
+    List<InactiveUserDto> getInactiveUsers();
+
     void saveUser(UpdatedUserDto updatedUserDto, CrowdUsernameCustomDto usernameCustomDto);
-
-    void save(UpdatedUserDto updatedUserDto);
-
-    void save(UpdatedUserDto updatedUserDto, CrowdUsernameCustomDto usernameCustomDto);
 
     ResponseEntity<CrowdUserDto> getCrowdUser(String username);
 

@@ -20,7 +20,8 @@ import java.util.List;
 
 /**
  * CrowdUserService 의 구현 클래스
- * SysUser Entity 와 1:1 매핑되어 있고, Crowd Rest API 호출하는 메소드를 제공한다.
+ * Crowd Rest API 호출하는 메소드를 제공하며,
+ * userReqUpdateRepository, crowdUsernameCustomRepository, updatedUserRepository 들의 메소드를 다루는 클래스
  */
 @Log4j2
 @Service
@@ -34,24 +35,26 @@ public class CrowdUserServiceImpl implements CrowdUserService {
     private final CrowdUsernameCustomRepository crowdUsernameCustomRepository;
     private final UserReqUpdateRepository userReqUpdateRepository;
 
+
+    @Transactional
     public List<UserDto> getUserReqUpdate() {
         return userReqUpdateRepository.findUserRequireUpdate();
     }
 
+    @Transactional
+    public List<InactiveUserDto> getInactiveUsers() {
+        return userReqUpdateRepository.findInactiveUser();
+    }
+
+    /**
+     * 파라미터의 UpdatedUser, CrowdUsernameCustom Upsert
+     * @param updatedUserDto
+     * @param usernameCustomDto
+     */
+    @Transactional
     public void saveUser(UpdatedUserDto updatedUserDto, CrowdUsernameCustomDto usernameCustomDto) {
-        if (usernameCustomDto == null)  save(updatedUserDto);
-        else save(updatedUserDto, usernameCustomDto);
-    }
-
-    @Transactional
-    public void save(UpdatedUserDto updatedUserDto) {
         updatedUserRepository.save(new UpdatedUser(updatedUserDto));
-    }
-
-    @Transactional
-    public void save(UpdatedUserDto updatedUserDto, CrowdUsernameCustomDto usernameCustomDto) {
-        updatedUserRepository.save(new UpdatedUser(updatedUserDto));
-        crowdUsernameCustomRepository.save(new CrowdUsernameCustom(usernameCustomDto));
+        if (usernameCustomDto != null)  crowdUsernameCustomRepository.save(new CrowdUsernameCustom(usernameCustomDto));
     }
 
     /**
@@ -113,7 +116,7 @@ public class CrowdUserServiceImpl implements CrowdUserService {
      * @param httpEntity - Rest API Request HttpEntity, Header 정보와 Request Body 정보가 포함되어있음
      * @return ResponseEntity<CrowdUserDto>
      */
-    public ResponseEntity<CrowdUserDto> callCrowdRestApi(String uri, HttpMethod method, HttpEntity httpEntity) {
+    public ResponseEntity<CrowdUserDto> callCrowdRestApi(String uri, HttpMethod method, HttpEntity<?> httpEntity) {
         ResponseEntity<CrowdUserDto> responseEntity;
         try {
             responseEntity = restTemplate.exchange(uri, method, httpEntity, CrowdUserDto.class);

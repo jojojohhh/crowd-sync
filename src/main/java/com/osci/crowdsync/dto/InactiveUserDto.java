@@ -8,7 +8,7 @@ import lombok.ToString;
 @Data
 @ToString
 @Getter
-public class UserDto {
+public class InactiveUserDto {
 
     private String corpCode;
 
@@ -20,23 +20,24 @@ public class UserDto {
 
     private String posName;
 
+    private String firstName;
+
+    private String lastName;
+
     private String email;
 
-    private String updatedUserDisplayName;
-
-    private String userCustomName;
-
+    private String displayName;
 
     @QueryProjection
-    public UserDto(String corpCode, String userId, String name, String deptName, String posName, String email, String updatedUserDisplayName, String userCustomName) {
+    public InactiveUserDto(String corpCode, String userId, String name, String deptName, String posName, String firstName, String lastName, String email, String displayName) {
         this.corpCode = corpCode;
         this.userId = userId;
         this.name = name;
         this.deptName = deptName;
         this.posName = posName;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
-        this.updatedUserDisplayName = updatedUserDisplayName;
-        this.userCustomName = userCustomName;
+        this.displayName = displayName;
     }
-
 }
