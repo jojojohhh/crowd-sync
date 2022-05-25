@@ -9,7 +9,9 @@ import lombok.*;
 @NoArgsConstructor
 @ToString
 public class UpdatedUserDto {
+
     private String corpCode;
+
     private String userId;
 
     private String name;
@@ -26,6 +28,8 @@ public class UpdatedUserDto {
 
     private String displayName;
 
+    private String active;
+
     public UpdatedUserDto(UpdatedUser updatedUser) {
         this.corpCode = updatedUser.getCorpCode();
         this.userId = updatedUser.getUserId();
@@ -36,5 +40,6 @@ public class UpdatedUserDto {
         this.lastName = updatedUser.getLastName();
         this.emailAddress = updatedUser.getEmailAddress();
         this.displayName = updatedUser.getDisplayName();
+        this.active = updatedUser.getActive();
     }
 }

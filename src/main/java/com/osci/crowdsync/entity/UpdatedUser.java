@@ -20,23 +20,34 @@ public class UpdatedUser {
     @Id
     @Column(name = "CORP_CODE")
     private String corpCode;
+
     @Id
     @Column(name = "USER_ID")
     private String userId;
+
     @Column(name = "NAME")
     private String name;
+
     @Column(name = "DEPT_NAME")
     private String deptName;
+
     @Column(name = "POS_NAME")
     private String posName;
+
     @Column(name = "FIRST_NAME")
     private String firstName;
+
     @Column(name = "LAST_NAME")
     private String lastName;
+
     @Column(name = "EMAIL")
     private String emailAddress;
+
     @Column(name = "DISPLAY_NAME")
     private String displayName;
+
+    @Column(name = "ACTIVE")
+    private String active;
 
     @OneToOne(mappedBy = "updatedUser")
     private SysUser sysUser;
@@ -51,5 +62,6 @@ public class UpdatedUser {
         this.lastName = updatedUserDto.getLastName();
         this.emailAddress = updatedUserDto.getEmailAddress();
         this.displayName = updatedUserDto.getDisplayName();
+        this.active = updatedUserDto.getActive();
     }
 }
