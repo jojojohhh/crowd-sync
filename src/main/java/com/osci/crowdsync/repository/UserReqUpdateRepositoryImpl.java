@@ -30,7 +30,7 @@ public class UserReqUpdateRepositoryImpl implements UserReqUpdateRepository {
      */
     public List<UserDto> findUserRequireUpdate() {
         return jpaQueryFactory
-                .select(new QUserDto(sysUser.corpCode, sysUser.userId, sysUser.name, sysUser.deptName, sysUser.posName, sysUser.email, updatedUser.displayName, crowdUsernameCustom.userCustomName))
+                .select(new QUserDto(sysUser.corpCode, sysUser.userId, sysUser.name, sysUser.deptName, sysUser.posName, sysUser.email, updatedUser.displayName, crowdUsernameCustom.userCustomName, sysUser.useYn, crowdUsernameCustom.chkYn))
                 .from(sysUser)
                 .leftJoin(sysUser.crowdUsernameCustom, crowdUsernameCustom)
                 .leftJoin(sysUser.updatedUser, updatedUser)
@@ -42,7 +42,7 @@ public class UserReqUpdateRepositoryImpl implements UserReqUpdateRepository {
                                         (crowdUsernameCustom.userCustomName.isNotNull().and(updatedUser.displayName.ne(crowdUsernameCustom.userCustomName)))
                                                 .or
                                         (updatedUser.userId.isNull())
-                                )).and(crowdUsernameCustom.chkYn.isNull().or(crowdUsernameCustom.chkYn.ne("Y")))
+                                )).and(crowdUsernameCustom.chkYn.isNull().or(crowdUsernameCustom.chkYn.ne("Y")).or(updatedUser.userId.isNull()))
                 )
                 .fetch();
     }
@@ -53,9 +53,9 @@ public class UserReqUpdateRepositoryImpl implements UserReqUpdateRepository {
      */
     public List<InactiveUserDto> findInactiveUser() {
         return jpaQueryFactory
-                .select(new QInactiveUserDto(sysUser.corpCode, sysUser.userId, sysUser.name, sysUser.deptName, sysUser.posName, updatedUser.firstName, updatedUser.lastName, sysUser.email, updatedUser.displayName))
+                .select(new QInactiveUserDto(sysUser.corpCode, sysUser.userId, sysUser.name, sysUser.deptName, sysUser.posName, updatedUser.firstName, updatedUser.lastName, sysUser.email, updatedUser.displayName, sysUser.useYn))
                 .from(sysUser)
-                .join(sysUser.updatedUser, updatedUser).on(sysUser.useYn.eq("N").and(updatedUser.active.eq("Y")))
+                .join(sysUser.updatedUser, updatedUser).on(sysUser.useYn.eq("N").and(updatedUser.active.isNull().or(updatedUser.active.eq("Y"))))
                 .fetch();
     }
 }

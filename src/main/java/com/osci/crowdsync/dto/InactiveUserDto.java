@@ -28,8 +28,10 @@ public class InactiveUserDto {
 
     private String displayName;
 
+    private String useYn;
+
     @QueryProjection
-    public InactiveUserDto(String corpCode, String userId, String name, String deptName, String posName, String firstName, String lastName, String email, String displayName) {
+    public InactiveUserDto(String corpCode, String userId, String name, String deptName, String posName, String firstName, String lastName, String email, String displayName, String useYn) {
         this.corpCode = corpCode;
         this.userId = userId;
         this.name = name;
@@ -39,5 +41,6 @@ public class InactiveUserDto {
         this.lastName = lastName;
         this.email = email;
         this.displayName = displayName;
+        this.useYn = useYn;
     }
 }
