@@ -1,9 +1,8 @@
 package com.osci.crowdsync.repository;
 
-import com.osci.crowdsync.dto.InactiveUserDto;
-import com.osci.crowdsync.dto.QInactiveUserDto;
-import com.osci.crowdsync.dto.QUserDto;
-import com.osci.crowdsync.dto.UserDto;
+import com.osci.crowdsync.dto.*;
+import com.osci.crowdsync.entity.QSysUser;
+import com.osci.crowdsync.entity.QUpdatedUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -58,4 +57,14 @@ public class UserReqUpdateRepositoryImpl implements UserReqUpdateRepository {
                 .join(sysUser.updatedUser, updatedUser).on(sysUser.useYn.eq("N").and(updatedUser.active.isNull().or(updatedUser.active.eq("Y"))))
                 .fetch();
     }
+
+    public List<SysUserDto> findNewUsers() {
+        return jpaQueryFactory
+                .select(new QSysUserDto(sysUser.corpCode, sysUser.userId, sysUser.name, sysUser.deptName, sysUser.posName, sysUser.email))
+                .from(sysUser)
+                .leftJoin(sysUser.updatedUser, updatedUser)
+                .where(updatedUser.userId.isNull())
+                .fetch();
+    }
+
 }

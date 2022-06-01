@@ -13,11 +13,12 @@ public interface CrowdUserService {
 
     void saveUser(UpdatedUserDto updatedUserDto, CrowdUsernameCustomDto usernameCustomDto);
 
-    ResponseEntity<CrowdUserDto> getCrowdUser(String username);
+    ResponseEntity<CrowdUserDto> getCrowdUserByWebClient(String username);
 
-    ResponseEntity<CrowdUserDto> updateCrowdUser(CrowdUserDto userDto);
+    ResponseEntity<CrowdUserDto> updateCrowdUserByWebClient(CrowdUserDto crowdUserDto);
 
-    ResponseEntity<CrowdUserDto> createCrowdUser(CrowdUserDto userDto);
+    ResponseEntity<CrowdUserDto> createCrowdUserByWebClient(CrowdUserDto crowdUserDto);
 
-    ResponseEntity<CrowdUserDto> deleteCrowdUser(String username);
+    ResponseEntity<CrowdUserDto> deleteCrowdUserByWebClient(String username);
+
 }

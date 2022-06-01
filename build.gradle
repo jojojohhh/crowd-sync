@@ -30,6 +30,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-log4j2'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
 	implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
 	compileOnly 'org.projectlombok:lombok'

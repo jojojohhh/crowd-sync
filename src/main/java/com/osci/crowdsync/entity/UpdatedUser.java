@@ -1,5 +1,6 @@
 package com.osci.crowdsync.entity;
 
+import com.osci.crowdsync.dto.SysUserDto;
 import com.osci.crowdsync.dto.UpdatedUserDto;
 import lombok.*;
 

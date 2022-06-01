@@ -15,8 +15,15 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.web.reactive.function.client.WebClient.RequestBodyUriSpec;
+import static org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 
 /**
  * CrowdUserService 의 구현 클래스
@@ -27,9 +34,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CrowdUserServiceImpl implements CrowdUserService {
-
-    private final RestTemplate restTemplate;
-    private final AtlassianProperties atlassianProperties;
+    private final WebClient webClient;
     private final String CROWD_USER_REST_API_URI = "/rest/usermanagement/1/user";
     private final UpdatedUserRepository updatedUserRepository;
     private final CrowdUsernameCustomRepository crowdUsernameCustomRepository;
@@ -57,43 +62,38 @@ public class CrowdUserServiceImpl implements CrowdUserService {
         if (usernameCustomDto != null)  crowdUsernameCustomRepository.save(new CrowdUsernameCustom(usernameCustomDto));
     }
 
+
     /**
      * Crowd Get User Rest API 호출 결과를 리턴한다.
      * @param username - Crowd 사용자의 username
      * @return ResponseEntity<CrowdUserDto>
      */
-    public ResponseEntity<CrowdUserDto> getCrowdUser(String username) {
-        HttpHeaders httpHeaders = getDefaultHeaders();
-        HttpEntity<String> httpEntity = new HttpEntity<>("", httpHeaders);
+    public ResponseEntity<CrowdUserDto> getCrowdUserByWebClient(String username) {
         final String URI = CROWD_USER_REST_API_URI + "?username=" + username;
         log.info("Call Crowd Rest API : " + "{method=GET, uri=" + URI + "}");
-        return callCrowdRestApi(atlassianProperties.getCrowd().getUrl() + URI, HttpMethod.GET, httpEntity);
+        return callRestApi(webClient.method(HttpMethod.GET), URI);
     }
 
     /**
      * Crowd update user Rest API 호출 결과를 리턴한다.
-     * @param userDto - Crowd update user Rest API Request Body
+     * @param crowdUserDto - Crowd update user Rest API Request Body
      * @return ResponseEntity<CrowdUserDto>
      */
-    public ResponseEntity<CrowdUserDto> updateCrowdUser(CrowdUserDto userDto) {
-        HttpHeaders httpHeaders = getDefaultHeaders();
-        HttpEntity<CrowdUserDto> httpEntity = new HttpEntity<>(userDto, httpHeaders);
-        final String URI = CROWD_USER_REST_API_URI + "?username=" + userDto.getName();
-        log.info("Call Crowd Rest API : " + "{method=PUT, uri=" + URI + "}");
-        return callCrowdRestApi(atlassianProperties.getCrowd().getUrl() + URI, HttpMethod.PUT, httpEntity);
+    public ResponseEntity<CrowdUserDto> updateCrowdUserByWebClient(CrowdUserDto crowdUserDto) {
+        final String URI = CROWD_USER_REST_API_URI;
+        log.info("Call Crowd Rest API : " + "{method=POST, uri=" + URI + "}");
+        return callRestApi(webClient.method(HttpMethod.PUT), URI, crowdUserDto);
     }
 
     /**
      * Crowd add user Rest API 호출 결과를 리턴한다.
-     * @param userDto - Crowd add user Rest API Request Body
+     * @param crowdUserDto - Crowd add user Rest API Request Body
      * @return ResponseEntity<CrowdUserDto>
      */
-    public ResponseEntity<CrowdUserDto> createCrowdUser(CrowdUserDto userDto) {
-        HttpHeaders httpHeaders = getDefaultHeaders();
-        HttpEntity<CrowdUserDto> httpEntity = new HttpEntity<>(userDto, httpHeaders);
+    public ResponseEntity<CrowdUserDto> createCrowdUserByWebClient(CrowdUserDto crowdUserDto) {
         final String URI = CROWD_USER_REST_API_URI;
         log.info("Call Crowd Rest API : " + "{method=POST, uri=" + URI + "}");
-        return callCrowdRestApi(atlassianProperties.getCrowd().getUrl() + URI, HttpMethod.POST, httpEntity);
+        return callRestApi(webClient.method(HttpMethod.POST), URI, crowdUserDto);
     }
 
     /**
@@ -101,45 +101,57 @@ public class CrowdUserServiceImpl implements CrowdUserService {
      * @param username - query parameter
      * @return ResponseEntity<CrowdUserDto>
      */
-    public ResponseEntity<CrowdUserDto> deleteCrowdUser(String username) {
-        HttpHeaders httpHeaders = getDefaultHeaders();
-        HttpEntity<String> httpEntity = new HttpEntity<>("", httpHeaders);
+    public ResponseEntity<CrowdUserDto> deleteCrowdUserByWebClient(String username) {
         final String URI = CROWD_USER_REST_API_URI + "?username=" + username;
         log.info("Call Crowd Rest API : " + "{method=DELETE, uri=" + URI + "}");
-        return callCrowdRestApi(atlassianProperties.getCrowd().getUrl() + URI, HttpMethod.DELETE, httpEntity);
+        return callRestApi(webClient.method(HttpMethod.DELETE), URI);
     }
 
     /**
-     * RestTemplate 클래스를 활용하여 Crowd Rest API 를 호출하는 메소드
+     * WebClient 클래스를 활용하여 Crowd Rest API 를 호출하는 메소드
+     * @param bodyUriSpec - WebClient 의 method 의 리턴 값
      * @param uri - Rest API uri
-     * @param method - HttpMethod type (ex. GET, POST, PUT, DELETE)
-     * @param httpEntity - Rest API Request HttpEntity, Header 정보와 Request Body 정보가 포함되어있음
      * @return ResponseEntity<CrowdUserDto>
      */
-    public ResponseEntity<CrowdUserDto> callCrowdRestApi(String uri, HttpMethod method, HttpEntity<?> httpEntity) {
+    public ResponseEntity<CrowdUserDto> callRestApi(RequestBodyUriSpec bodyUriSpec, String uri) {
         ResponseEntity<CrowdUserDto> responseEntity;
         try {
-            responseEntity = restTemplate.exchange(uri, method, httpEntity, CrowdUserDto.class);
+            responseEntity = bodyUriSpec.uri(uri)
+                    .retrieve()
+                    .toEntity(CrowdUserDto.class)
+                    .block();
             log.info("status_code=" + responseEntity.getStatusCodeValue());
             if (!responseEntity.getStatusCode().equals(HttpStatus.NO_CONTENT))   log.info("response_body=" + responseEntity.getBody().toString());
             return responseEntity;
-        } catch (Exception e) {
-            responseEntity = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (WebClientResponseException e) {
+            responseEntity = new ResponseEntity<>(HttpStatus.valueOf(e.getStatusCode().value()));
             log.warn("exception_message=" + e.getMessage());
             return responseEntity;
         }
     }
 
     /**
-     * 기본 HttpHeaders 를 가져오는 메소드
-     * Crowd Application jira 에 대한 Basic Auth 를 세팅한다.
-     * @return HttpHeaders
+     * WebClient 클래스를 활용하여 Crowd Rest API 를 호출하는 메소드
+     * @param bodyUriSpec - WebClient 의 method 의 리턴 값
+     * @param uri - Rest API uri
+     * @param crowdUserDto - Request Body
+     * @return ResponseEntity<CrowdUserDto>
      */
-    public HttpHeaders getDefaultHeaders() {
-        return HttpHeaderBuilder.builder()
-                .mediaType(MediaType.APPLICATION_JSON)
-                .basicAuth(atlassianProperties.getApplication().getUsername(), atlassianProperties.getApplication().getPassword())
-                .cacheControl("no-cache")
-                .build();
+    public ResponseEntity<CrowdUserDto> callRestApi(RequestBodyUriSpec bodyUriSpec, String uri, CrowdUserDto crowdUserDto) {
+        ResponseEntity<CrowdUserDto> responseEntity;
+        try {
+            responseEntity = bodyUriSpec.uri(uri)
+                    .bodyValue(crowdUserDto)
+                    .retrieve()
+                    .toEntity(CrowdUserDto.class)
+                    .block();
+            log.info("status_code=" + responseEntity.getStatusCodeValue());
+            if (!responseEntity.getStatusCode().equals(HttpStatus.NO_CONTENT))   log.info("response_body=" + responseEntity.getBody().toString());
+            return responseEntity;
+        } catch (WebClientResponseException e) {
+            responseEntity = new ResponseEntity<>(HttpStatus.valueOf(e.getStatusCode().value()));
+            log.warn("exception_message=" + e.getMessage());
+            return responseEntity;
+        }
     }
 }

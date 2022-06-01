@@ -1,6 +1,7 @@
 package com.osci.crowdsync.dto;
 
 import com.osci.crowdsync.entity.UpdatedUser;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.*;
 
 @Getter @Setter
