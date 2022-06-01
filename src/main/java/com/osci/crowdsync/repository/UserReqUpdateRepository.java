@@ -10,6 +10,4 @@ public interface UserReqUpdateRepository {
     List<UserDto> findUserRequireUpdate();
 
     List<InactiveUserDto> findInactiveUser();
-
-    List<SysUserDto> findNewUsers();
 }

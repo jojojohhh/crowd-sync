@@ -1,6 +1,5 @@
 package com.osci.crowdsync.service.impl;
 
-import com.osci.crowdsync.config.properties.AtlassianProperties;
 import com.osci.crowdsync.dto.*;
 import com.osci.crowdsync.entity.CrowdUsernameCustom;
 import com.osci.crowdsync.entity.UpdatedUser;
@@ -8,22 +7,17 @@ import com.osci.crowdsync.repository.CrowdUsernameCustomRepository;
 import com.osci.crowdsync.repository.UpdatedUserRepository;
 import com.osci.crowdsync.repository.UserReqUpdateRepository;
 import com.osci.crowdsync.service.CrowdUserService;
-import com.osci.crowdsync.utils.HttpHeaderBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.springframework.web.reactive.function.client.WebClient.RequestBodyUriSpec;
-import static org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 
 /**
  * CrowdUserService 의 구현 클래스
@@ -53,13 +47,21 @@ public class CrowdUserServiceImpl implements CrowdUserService {
 
     /**
      * 파라미터의 UpdatedUser, CrowdUsernameCustom Upsert
-     * @param updatedUserDto
-     * @param usernameCustomDto
+     * @param updatedUsers
+     * @param usernameCustoms
      */
     @Transactional
-    public void saveUser(UpdatedUserDto updatedUserDto, CrowdUsernameCustomDto usernameCustomDto) {
-        updatedUserRepository.save(new UpdatedUser(updatedUserDto));
-        if (usernameCustomDto != null)  crowdUsernameCustomRepository.save(new CrowdUsernameCustom(usernameCustomDto));
+    public void saveUser(List<UpdatedUser> updatedUsers, List<CrowdUsernameCustom> usernameCustoms) {
+        updatedUsers.stream().parallel().forEach(updatedUser -> {
+            log.info("upsert updated_user table " + updatedUser.toString());
+            updatedUserRepository.save(updatedUser);
+        });
+        if (usernameCustoms != null) {
+            usernameCustoms.stream().parallel().forEach(crowdUsernameCustom -> {
+                log.info("upsert crowd_username_custom table " + crowdUsernameCustom.toString());
+                crowdUsernameCustomRepository.save(crowdUsernameCustom);
+            });
+        }
     }
 
 
@@ -80,8 +82,8 @@ public class CrowdUserServiceImpl implements CrowdUserService {
      * @return ResponseEntity<CrowdUserDto>
      */
     public ResponseEntity<CrowdUserDto> updateCrowdUserByWebClient(CrowdUserDto crowdUserDto) {
-        final String URI = CROWD_USER_REST_API_URI;
-        log.info("Call Crowd Rest API : " + "{method=POST, uri=" + URI + "}");
+        final String URI = CROWD_USER_REST_API_URI + "?username" + crowdUserDto.getName();
+        log.info("Call Crowd Rest API : " + "{method=PUT, uri=" + URI + "}" + crowdUserDto.toString());
         return callRestApi(webClient.method(HttpMethod.PUT), URI, crowdUserDto);
     }
 
@@ -92,7 +94,7 @@ public class CrowdUserServiceImpl implements CrowdUserService {
      */
     public ResponseEntity<CrowdUserDto> createCrowdUserByWebClient(CrowdUserDto crowdUserDto) {
         final String URI = CROWD_USER_REST_API_URI;
-        log.info("Call Crowd Rest API : " + "{method=POST, uri=" + URI + "}");
+        log.info("Call Crowd Rest API : " + "{method=POST, uri=" + URI + "}" + crowdUserDto.toString());
         return callRestApi(webClient.method(HttpMethod.POST), URI, crowdUserDto);
     }
 
@@ -117,6 +119,7 @@ public class CrowdUserServiceImpl implements CrowdUserService {
         ResponseEntity<CrowdUserDto> responseEntity;
         try {
             responseEntity = bodyUriSpec.uri(uri)
+                    .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .toEntity(CrowdUserDto.class)
                     .block();
@@ -141,6 +144,7 @@ public class CrowdUserServiceImpl implements CrowdUserService {
         ResponseEntity<CrowdUserDto> responseEntity;
         try {
             responseEntity = bodyUriSpec.uri(uri)
+                    .accept(MediaType.APPLICATION_JSON)
                     .bodyValue(crowdUserDto)
                     .retrieve()
                     .toEntity(CrowdUserDto.class)
